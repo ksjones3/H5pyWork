@@ -22,8 +22,10 @@ def makeConstantsTensor(branches):
     cell_eta = np.array(branches['cell_eta'][0])
     cell_phi = np.array(branches['cell_phi'][0])
     cell_subCalo = np.array(branches['cell_subCalo'][0])
+    cell_hashID = np.array(branches['cell_hashID'][0])
+    cell_noiseSigma = np.array(branches['cell_noiseSigma'][0])
     length = len(cell_x)
-    constantsData = np.zeros((length, 6))
+    constantsData = np.zeros((length, 8))
     
     constantsData[:, 0] = cell_x
     constantsData[:, 1] = cell_y
@@ -31,6 +33,8 @@ def makeConstantsTensor(branches):
     constantsData[:, 3] = cell_eta
     constantsData[:, 4] = cell_phi
     constantsData[:, 5] = cell_subCalo
+    constantsData[:, 6] = cell_hashID
+    constantsData[:, 7] = cell_noiseSigma
     
     constantsTensor = tf.constant(constantsData)
     print("Completed Constants Tensor")
@@ -39,7 +43,6 @@ def makeConstantsTensor(branches):
 def makeCellDataTensor(branches):
     cell_sampling = np.array(branches['cell_sampling'])
     cell_e = np.array(branches['cell_e'])
-    cell_sigma = np.array(branches['cell_sigma'])
     cell_time = np.array(branches['cell_time'])
     cell_weight = np.array(branches['cell_weight'])
     cell_truth = np.array(branches['cell_truth'])
@@ -47,20 +50,27 @@ def makeCellDataTensor(branches):
     cell_to_cluster_e = np.array(branches['cell_to_cluster_e'])
     cell_to_cluster_eta = np.array(branches['cell_to_cluster_eta'])
     cell_to_cluster_phi = np.array(branches['cell_to_cluster_phi'])
+    cell_SNR = np.array(branches['cell_SNR'])
+    cell_cluster_index = np.array(branches['cell_cluster_index'])
+    cell_to_cluster_e = np.array(branches['cell_to_cluster_e'])
+    cell_to_cluster_eta = np.array(branches['cell_to_cluster_eta'])
+    cell_to_cluster_phi = np.array(branches['cell_to_cluster_phi'])
+    
     number_of_events = len(cell_e)
     number_of_cells = len(cell_e[0])
     cellData = np.zeros((number_of_events, number_of_cells, 10))
 
     cellData[:, :, 0] = cell_sampling
     cellData[:, :, 1] = cell_e
-    cellData[:, :, 2] = cell_sigma
-    cellData[:, :, 3] = cell_time
-    cellData[:, :, 4] = cell_weight
-    cellData[:, :, 5] = cell_truth
-    cellData[:, :, 6] = cell_cluster_index
-    cellData[:, :, 7] = cell_to_cluster_e
-    cellData[:, :, 8] = cell_to_cluster_eta
-    cellData[:, :, 9] = cell_to_cluster_phi
+    cellData[:, :, 2] = cell_time
+    cellData[:, :, 3] = cell_weight
+    cellData[:, :, 4] = cell_truth
+    cellData[:, :, 5] = cell_cluster_index
+    cellData[:, :, 6] = cell_to_cluster_e
+    cellData[:, :, 7] = cell_to_cluster_eta
+    cellData[:, :, 8] = cell_to_cluster_phi
+    cellData[:, :, 9] = cell_SNR
+    
     
     cellDataTensor = tf.constant(cellData)
     print("Completed Cell Data Tensor")
@@ -97,9 +107,12 @@ def zeroPackData(data, maxClusterNumber):
 
 def makeClusterDataTensor(branches):
     maxClusterNumber = findMaxClusterNumber(branches)
+    
     cluster_e = zeroPackData(branches['cluster_e'], maxClusterNumber)
     cluster_eta = zeroPackData(branches['cluster_eta'], maxClusterNumber)
     cluster_phi = zeroPackData(branches['cluster_phi'], maxClusterNumber)
+    
+    
     number_of_events = len(cluster_e)
     clusterData = np.zeros((number_of_events, maxClusterNumber, 3))
 
